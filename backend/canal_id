@@ -1,0 +1,35 @@
+from telethon.sync import TelegramClient
+from telethon.tl.types import Channel, Chat
+from telethon.tl.functions.messages import GetDialogsRequest
+from telethon.tl.types import InputPeerEmpty
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+api_id = os.getenv('api_id')
+api_hash = os.getenv('api_hash')
+
+# Crée une session Telegram
+with TelegramClient('session_name', api_id, api_hash) as client:
+    print("Connexion réussie.")
+    
+    # Récupère les dialogues (groupes, canaux, utilisateurs)
+    result = client(GetDialogsRequest(
+        offset_date=None,
+        offset_id=0,
+        offset_peer=InputPeerEmpty(),
+        limit=100,
+        hash=0
+    ))
+
+    print("\nListe des groupes et canaux :\n")
+    for chat in result.chats:
+        if isinstance(chat, (Channel, Chat)):
+            chat_type = "Canal" if isinstance(chat, Channel) and chat.megagroup is False else "Groupe"
+            content_protected = getattr(chat, 'noforwards', False)
+
+            print(f"🆔 ID : {chat.id}")
+            print(f"📛 Nom : {chat.title}")
+            print(f"📦 Type : {chat_type}")
+            print(f"🔒 Messages copiables : {'❌ Bloqué' if content_protected else '✅ Oui'}")
+            print("-" * 40)
