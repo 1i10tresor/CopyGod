@@ -1,0 +1,33 @@
+from telethon.sync import TelegramClient
+from telethon.tl.functions.messages import GetMessagesRequest
+from telethon.tl.types import InputMessageID, InputPeerChannel
+from telethon.tl.functions.channels import GetChannelsRequest
+import os
+from dotenv import load_dotenv
+import asyncio
+
+
+load_dotenv()
+api_id = os.getenv('api_id')
+api_hash = os.getenv('api_hash')
+
+channel_username = -1770543299  # ou ID numérique du canal
+message_id = 7254  # L'ID du message que tu veux récupérer
+client = TelegramClient('session_name', api_id, api_hash)
+
+async def main():
+
+    
+    await client.start()
+    async for dialog in client.iter_dialogs():
+        pass
+    channel = await client.get_entity(channel_username)
+
+    # Récupérer le message par ID
+    message = await client.get_messages(channel, ids=message_id)
+
+    # Afficher le contenu
+    print(f"Contenu du message : {message.text}")
+
+if __name__ == '__main__':  
+    asyncio.run(main())

@@ -1,76 +1,70 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
-from telethon.sync import TelegramClient
-from telethon.tl.types import Channel, Chat
-from telethon.tl.functions.messages import GetDialogsRequest
-from telethon.tl.types import InputPeerEmpty
+from telethon import TelegramClient
 from dotenv import load_dotenv
 import os
-
-app = Flask(__name__)
-CORS(app)
-
+import asyncio
+import re
+from openai import AsyncOpenAI
+from telethon import events
+from telethon.tl.types import PeerChannel
+import MetaTrader5 as mt5
+import os 
+from datetime import datetime, timedelta
+import time
+import ast
+from kasper import *
 load_dotenv()
-api_id = os.getenv('api_id')
-api_hash = os.getenv('api_hash')
-session_name = 'anon'
+api_id = os.getenv('api_id')  
+api_hash = os.getenv('api_hash')  
+gpt_key = os.getenv('GPT_KEY')
+client_gpt = AsyncOpenAI(api_key=gpt_key)
+client = TelegramClient('anon', api_id, api_hash)
+mt5_login = os.getenv("MT5_LOGIN")
+mt5_password = os.getenv("MT5_PSWRD")
+mt5_server = os.getenv("MT5_SERVEUR")
+expire_date = datetime.now() + timedelta(minutes=10)
+expiration_timestamp = int(time.mktime(expire_date.timetuple()))
+channel_ids = [-2259371711, -1770543299, -2507130648, -1441894073, -1951792433, -1428690627, -1260132661, -1626843631]
+indo_channel_ids = [2507130648, 1441894073, 1951792433, 1428690627, 1260132661, 1626843631 ]
+kasper_id = -2259371711
 
-@app.route('/channels')
-def get_channels():
-    with TelegramClient(session_name, api_id, api_hash) as client:
-        result = client(GetDialogsRequest(
-            offset_date=None,
-            offset_id=0,
-            offset_peer=InputPeerEmpty(),
-            limit=100,
-            hash=0
-        ))
-        
-        channels = []
-        for chat in result.chats:
-            if isinstance(chat, (Channel, Chat)):
-                channels.append({
-                    'id': chat.id,
-                    'title': chat.title,
-                    'type': "Canal" if isinstance(chat, Channel) and chat.megagroup is False else "Groupe"
-                })
-        
-        return jsonify(channels)
 
-@app.route('/messages/<int:channel_id>')
-def get_messages(channel_id):
-    with TelegramClient(session_name, api_id, api_hash) as client:
+async def main():
+    if not await client.start() :
+        print("Échec de la connexion au client Telegram.")
+        return
+    print("Connexion réussie.")
+    channel_entities = []
+    for channel_id in channel_ids:
         try:
-            channel = client.get_entity(int(f"-100{channel_id}"))
-            messages = client.get_messages(channel, limit=10)
-            
-            messages_list = []
-            for msg in messages:
-                message_data = {
-                    'id': msg.id,
-                    'date': msg.date.isoformat(),
-                    'sender_id': msg.sender_id if hasattr(msg, 'sender_id') else 'Système',
-                    'text': msg.text or '<message média ou vide>'
-                }
-                
-                if msg.reply_to:
-                    try:
-                        replied_msg = client.get_messages(channel, ids=msg.reply_to.reply_to_msg_id)
-                        message_data['reply_to'] = {
-                            'id': replied_msg.id,
-                            'date': replied_msg.date.isoformat(),
-                            'sender_id': replied_msg.sender_id if hasattr(replied_msg, 'sender_id') else 'Système',
-                            'text': replied_msg.text or '<message média ou vide>'
-                        }
-                    except Exception:
-                        message_data['reply_to'] = None
-                
-                messages_list.append(message_data)
-            
-            return jsonify(messages_list)
-            
+            channel_entity = await client.get_entity(PeerChannel(channel_id))
+            channel_entities.append(channel_entity)
         except Exception as e:
-            return jsonify({'error': str(e)}), 400
+            print(f"Erreur lors de la récupération du canal ID {channel_id}: {e}")
+    if not channel_entities:
+        print("Aucun canal trouvé. Veuillez vérifier les IDs.")
+        await client.disconnect()
+        return
+    if not mt5.initialize(login=int(mt5_login), password=mt5_password, server=mt5_server) :
+        print("Échec de l'initialisation de MetaTrader 5.")
+        mt5.shutdown()
+        return
+    print("Connexion à MetaTrader 5 réussie.")
+    if mt5.symbol_select("XAUUSD", True) and mt5.symbol_select("BTCUSD", True) :
+        print("Symboles XAUUSD et BTCUSD sélectionnés avec succès.")
+    else:
+        print("Erreur lors de la sélection des symboles XAUUSD et BTCUSD.")
+        return
+    @client.on(events.NewMessage(chats=channel_entities))
+    async def handle_new_message(event):
+        message = event.message
+        entity = await client.get_entity(-event.chat_id)
+        if abs(entity.id) == abs(kasper_id):
+            return await signal_or_modify(message)
+        else:
+            print("erreur, le message n'est pas de Kasper")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    await client.run_until_disconnected()
+
+
+if __name__ == '__main__':   
+    asyncio.run(main())
