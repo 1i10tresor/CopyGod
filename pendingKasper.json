@@ -1,11 +1,1 @@
-{
-    "pending_order": true,
-    "symbol": "XAUUSD",
-    "message_id": 199,
-    "order_ids": [
-        136317030,
-        136317031,
-        136317032
-    ],
-    "sens": 0
-}
+{"pending_order": false}
