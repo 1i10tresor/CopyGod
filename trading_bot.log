@@ -145,3 +145,108 @@
 2025-06-07 17:26:21,169 - INFO - Ordre modifié avec succès, ID: 136399449, SL: 107000, TP: 103000
 2025-06-07 17:26:21,169 - INFO - Modification de l'ordre 2 en cours...
 2025-06-07 17:26:21,259 - INFO - Ordre modifié avec succès, ID: 136399450, SL: 107000, TP: 102000
+2025-06-08 11:01:37,525 - INFO - Connecting to 149.154.167.92:443/TcpFull...
+2025-06-08 11:01:37,551 - INFO - Connection to 149.154.167.92:443/TcpFull complete!
+2025-06-08 11:01:37,876 - INFO - Connexion Telegram réussie.
+2025-06-08 11:01:37,932 - INFO - Canal -2259371711 récupéré avec succès
+2025-06-08 11:01:37,964 - INFO - Canal -1770543299 récupéré avec succès
+2025-06-08 11:01:37,995 - INFO - Canal -2507130648 récupéré avec succès
+2025-06-08 11:01:38,027 - INFO - Canal -1441894073 récupéré avec succès
+2025-06-08 11:01:38,064 - INFO - Canal -1951792433 récupéré avec succès
+2025-06-08 11:01:38,095 - INFO - Canal -1428690627 récupéré avec succès
+2025-06-08 11:01:38,177 - INFO - Canal -1260132661 récupéré avec succès
+2025-06-08 11:01:38,211 - INFO - Canal -1626843631 récupéré avec succès
+2025-06-08 11:01:39,922 - INFO - Connexion à MetaTrader 5 réussie.
+2025-06-08 11:01:39,923 - INFO - Symbole XAUUSD sélectionné avec succès
+2025-06-08 11:01:39,923 - INFO - Symbole BTCUSD sélectionné avec succès
+2025-06-08 11:01:39,923 - INFO - Bot démarré, en attente de messages...
+2025-06-08 11:02:29,484 - INFO - Signal d'achat détecté.
+2025-06-08 11:02:29,484 - INFO - Ordre BTCUSD BUY - Prix: 105398.02, TP: [105798.02, 106198.02, 106598.02], SL: 104998.02
+2025-06-08 11:02:29,484 - ERROR - Erreur lors de l'envoi de l'ordre 1: 10030 - (1, 'Success')
+2025-06-08 11:02:29,484 - ERROR - Erreur lors de l'envoi de l'ordre 2: 10030 - (1, 'Success')
+2025-06-08 11:02:29,485 - ERROR - Erreur lors de l'envoi de l'ordre 3: 10030 - (1, 'Success')
+2025-06-08 11:02:29,485 - ERROR - Aucun ordre n'a pu être envoyé
+2025-06-08 11:04:00,488 - INFO - Got difference for account updates
+2025-06-08 11:50:39,752 - INFO - Connecting to 149.154.167.92:443/TcpFull...
+2025-06-08 11:50:39,774 - INFO - Connection to 149.154.167.92:443/TcpFull complete!
+2025-06-08 11:50:39,947 - INFO - Connexion Telegram réussie.
+2025-06-08 11:50:40,009 - INFO - Canal -2259371711 récupéré avec succès
+2025-06-08 11:50:40,043 - INFO - Canal -1770543299 récupéré avec succès
+2025-06-08 11:50:40,089 - INFO - Canal -2507130648 récupéré avec succès
+2025-06-08 11:50:40,125 - INFO - Canal -1441894073 récupéré avec succès
+2025-06-08 11:50:40,156 - INFO - Canal -1951792433 récupéré avec succès
+2025-06-08 11:50:40,235 - INFO - Canal -1428690627 récupéré avec succès
+2025-06-08 11:50:40,297 - INFO - Canal -1260132661 récupéré avec succès
+2025-06-08 11:50:40,378 - INFO - Canal -1626843631 récupéré avec succès
+2025-06-08 11:50:40,387 - INFO - Connexion à MetaTrader 5 réussie.
+2025-06-08 11:50:40,387 - INFO - Symbole XAUUSD sélectionné avec succès
+2025-06-08 11:50:40,388 - INFO - Symbole BTCUSD sélectionné avec succès
+2025-06-08 11:50:40,388 - INFO - Bot démarré, en attente de messages...
+2025-06-08 11:50:47,332 - INFO - Signal d'achat détecté.
+2025-06-08 11:50:47,333 - INFO - Ordre BTCUSD BUY - Prix: 105189.08, TP: [105589.08, 105989.08, 106389.08], SL: 104789.08
+2025-06-08 11:50:47,333 - ERROR - Erreur lors de l'envoi de l'ordre 1: 10030 - (1, 'Success')
+2025-06-08 11:50:47,334 - ERROR - Erreur lors de l'envoi de l'ordre 2: 10030 - (1, 'Success')
+2025-06-08 11:50:47,334 - ERROR - Erreur lors de l'envoi de l'ordre 3: 10030 - (1, 'Success')
+2025-06-08 11:50:47,334 - ERROR - Aucun ordre n'a pu être envoyé
+2025-06-08 12:16:21,095 - INFO - Connecting to 149.154.167.92:443/TcpFull...
+2025-06-08 12:16:21,120 - INFO - Connection to 149.154.167.92:443/TcpFull complete!
+2025-06-08 12:16:21,302 - INFO - Connexion Telegram réussie.
+2025-06-08 12:16:21,334 - INFO - Canal -2259371711 récupéré avec succès
+2025-06-08 12:16:21,378 - INFO - Canal -1770543299 récupéré avec succès
+2025-06-08 12:16:21,423 - INFO - Canal -2507130648 récupéré avec succès
+2025-06-08 12:16:21,461 - INFO - Canal -1441894073 récupéré avec succès
+2025-06-08 12:16:21,504 - INFO - Canal -1951792433 récupéré avec succès
+2025-06-08 12:16:21,536 - INFO - Canal -1428690627 récupéré avec succès
+2025-06-08 12:16:21,569 - INFO - Canal -1260132661 récupéré avec succès
+2025-06-08 12:16:21,602 - INFO - Canal -1626843631 récupéré avec succès
+2025-06-08 12:16:21,614 - INFO - Connexion à MetaTrader 5 réussie.
+2025-06-08 12:16:21,614 - INFO - Symbole XAUUSD sélectionné avec succès
+2025-06-08 12:16:21,614 - INFO - Symbole BTCUSD sélectionné avec succès
+2025-06-08 12:16:21,614 - INFO - Bot démarré, en attente de messages...
+2025-06-08 12:18:26,173 - INFO - Signal d'achat détecté.
+2025-06-08 12:18:26,173 - INFO - Ordre BTCUSD BUY - Prix: 105091.07, TP: [105491.07, 105891.07, 106291.07], SL: 104691.07
+2025-06-08 12:18:26,174 - ERROR - Erreur lors de l'envoi de l'ordre 1: 10030 - (1, 'Success')
+2025-06-08 12:18:26,174 - ERROR - Erreur lors de l'envoi de l'ordre 2: 10030 - (1, 'Success')
+2025-06-08 12:18:26,175 - ERROR - Erreur lors de l'envoi de l'ordre 3: 10030 - (1, 'Success')
+2025-06-08 12:18:26,175 - ERROR - Aucun ordre n'a pu être envoyé
+2025-06-08 12:19:03,376 - INFO - Connecting to 149.154.167.92:443/TcpFull...
+2025-06-08 12:19:03,398 - INFO - Connection to 149.154.167.92:443/TcpFull complete!
+2025-06-08 12:19:03,558 - INFO - Connexion Telegram réussie.
+2025-06-08 12:19:03,587 - INFO - Canal -2259371711 récupéré avec succès
+2025-06-08 12:19:03,635 - INFO - Canal -1770543299 récupéré avec succès
+2025-06-08 12:19:03,663 - INFO - Canal -2507130648 récupéré avec succès
+2025-06-08 12:19:03,694 - INFO - Canal -1441894073 récupéré avec succès
+2025-06-08 12:19:03,722 - INFO - Canal -1951792433 récupéré avec succès
+2025-06-08 12:19:03,751 - INFO - Canal -1428690627 récupéré avec succès
+2025-06-08 12:19:03,779 - INFO - Canal -1260132661 récupéré avec succès
+2025-06-08 12:19:03,818 - INFO - Canal -1626843631 récupéré avec succès
+2025-06-08 12:19:03,829 - INFO - Connexion à MetaTrader 5 réussie.
+2025-06-08 12:19:03,829 - INFO - Symbole XAUUSD sélectionné avec succès
+2025-06-08 12:19:03,829 - INFO - Symbole BTCUSD sélectionné avec succès
+2025-06-08 12:19:03,829 - INFO - Bot démarré, en attente de messages...
+2025-06-08 12:19:08,268 - INFO - Signal d'achat détecté.
+2025-06-08 12:19:08,268 - INFO - Ordre BTCUSD BUY - Prix: 105093.91, TP: [105493.91, 105893.91, 106293.91], SL: 104693.91
+2025-06-08 12:19:08,749 - INFO - Ordre 1 envoyé avec succès, ID: 106305182
+2025-06-08 12:19:09,122 - INFO - Ordre 2 envoyé avec succès, ID: 106305183
+2025-06-08 12:19:09,585 - INFO - Ordre 3 envoyé avec succès, ID: 106305184
+2025-06-08 12:19:09,586 - INFO - État pending sauvegardé: 3 ordres
+2025-06-08 12:21:09,996 - INFO - Got difference for account updates
+2025-06-08 12:21:11,240 - INFO - Signal d'achat détecté.
+2025-06-08 12:21:11,241 - INFO - Ordre BTCUSD BUY - Prix: 105086.53, TP: [105486.53, 105886.53, 106286.53], SL: 104686.53
+2025-06-08 12:21:11,691 - INFO - Ordre 1 envoyé avec succès, ID: 106305286
+2025-06-08 12:21:12,100 - INFO - Ordre 2 envoyé avec succès, ID: 106305287
+2025-06-08 12:21:12,507 - INFO - Ordre 3 envoyé avec succès, ID: 106305288
+2025-06-08 12:21:12,508 - INFO - État pending sauvegardé: 3 ordres
+2025-06-08 12:21:31,161 - INFO - Envoi du prompt à GPT-4...
+2025-06-08 12:21:33,773 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-08 12:21:33,777 - INFO - Réponse de GPT-4: {'sens': 0, 'actif': 'BTCUSD', 'SL': '104000', 'Entry': '105000', 'TP': ['106000', '107000', '108000']}
+2025-06-08 12:21:33,777 - INFO - Positions actuelles: [106305286, 106305287, 106305288]
+2025-06-08 12:21:33,777 - INFO - 3 ordres vs 3 TP
+2025-06-08 12:21:33,777 - INFO - Sens: 0 vs 0
+2025-06-08 12:21:33,777 - INFO - Symbole: BTCUSD vs BTCUSD
+2025-06-08 12:21:33,777 - INFO - Modification de l'ordre 0 en cours...
+2025-06-08 12:21:33,796 - INFO - Ordre modifié avec succès, ID: 106305286, SL: 104000, TP: 106000
+2025-06-08 12:21:33,796 - INFO - Modification de l'ordre 1 en cours...
+2025-06-08 12:21:33,815 - INFO - Ordre modifié avec succès, ID: 106305287, SL: 104000, TP: 107000
+2025-06-08 12:21:33,815 - INFO - Modification de l'ordre 2 en cours...
+2025-06-08 12:21:33,835 - INFO - Ordre modifié avec succès, ID: 106305288, SL: 104000, TP: 108000

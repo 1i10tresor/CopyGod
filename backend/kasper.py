@@ -379,7 +379,7 @@ async def signal_kasper(message, message_id):
 async def send_order_kasper(symbol, price, sl, tps, sens, message_id):
     try:  # modified
         order_ids = []
-        lot_size = 0.01
+        lot_size = 0.01 
         
         # Validation des paramètres  # modified
         if not symbol or not isinstance(symbol, str):  # modified
@@ -411,10 +411,12 @@ async def send_order_kasper(symbol, price, sl, tps, sens, message_id):
                     "deviation": 1,
                     "magic": int(message_id), 
                     "comment": "Signal sans détails Kasper",
-                    "type_filling": mt5.ORDER_FILLING_FOK,
+                    "type_filling": mt5.ORDER_FILLING_IOC,
                 }
                 
                 order = mt5.order_send(request)
+                print("response", order)
+                print(request)
                 if order is None:  # modified
                     logger.error(f"Échec de l'envoi de l'ordre {i+1}: {mt5.last_error()}")  # modified
                     continue  # modified
