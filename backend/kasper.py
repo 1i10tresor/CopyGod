@@ -13,40 +13,40 @@ import time
 import ast
 from kasper import *
 import json
-import logging  # modified
+import logging
 
-logger = logging.getLogger(__name__)  # modified
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-# Validation des variables d'environnement  # modified
-required_env_vars = ['api_id', 'api_hash', 'GPT_KEY', 'MT5_LOGIN', 'MT5_PSWRD', 'MT5_SERVEUR']  # modified
-missing_vars = [var for var in required_env_vars if not os.getenv(var)]  # modified
-if missing_vars:  # modified
-    logger.error(f"Variables d'environnement manquantes: {missing_vars}")  # modified
-    raise ValueError(f"Variables d'environnement manquantes: {missing_vars}")  # modified
+# Validation des variables d'environnement
+required_env_vars = ['api_id', 'api_hash', 'GPT_KEY', 'MT5_LOGIN', 'MT5_PSWRD', 'MT5_SERVEUR']
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+if missing_vars:
+    logger.error(f"Variables d'environnement manquantes: {missing_vars}")
+    raise ValueError(f"Variables d'environnement manquantes: {missing_vars}")
 
 api_id = os.getenv('api_id')  
 api_hash = os.getenv('api_hash')  
 gpt_key = os.getenv('GPT_KEY')
 
-try:  # modified
+try:
     client_gpt = AsyncOpenAI(api_key=gpt_key)
     client = TelegramClient('anon', api_id, api_hash)
-except Exception as e:  # modified
-    logger.error(f"Erreur lors de l'initialisation des clients: {e}")  # modified
-    raise  # modified
+except Exception as e:
+    logger.error(f"Erreur lors de l'initialisation des clients: {e}")
+    raise
 
 mt5_login = os.getenv("MT5_LOGIN")
 mt5_password = os.getenv("MT5_PSWRD")
 mt5_server = os.getenv("MT5_SERVEUR")
 
-try:  # modified
+try:
     expire_date = datetime.now() + timedelta(minutes=10)
     expiration_timestamp = int(time.mktime(expire_date.timetuple()))
-except Exception as e:  # modified
-    logger.error(f"Erreur lors du calcul de la date d'expiration: {e}")  # modified
-    expiration_timestamp = None  # modified
+except Exception as e:
+    logger.error(f"Erreur lors du calcul de la date d'expiration: {e}")
+    expiration_timestamp = None
 
 channel_ids = [-2259371711, -1770543299, -2507130648, -1441894073, -1951792433, -1428690627, -1260132661, -1626843631]
 indo_channel_ids = [2507130648, 1441894073, 1951792433, 1428690627, 1260132661, 1626843631 ]
@@ -56,49 +56,47 @@ kasper_id = -2259371711
 break_even_monitoring = {}
 
 async def signal_or_modify(message):
-    try:  # modified
+    try:
         if not mt5.initialize():
-            logger.error("Échec de l'initialisation de MetaTrader 5.")  # modified
+            logger.error("Échec de l'initialisation de MetaTrader 5.")
             return False
             
-        if not hasattr(message, 'id') or not hasattr(message, 'text'):  # modified
-            logger.error("Message invalide reçu")  # modified
-            return False  # modified
+        if not hasattr(message, 'id') or not hasattr(message, 'text'):
+            logger.error("Message invalide reçu")
+            return False
             
         message_id = message.id
         message_text = message.text
         
-        if not message_text:  # modified
-            logger.warning("Le message est vide.")  # modified
-            return False  # modified
+        if not message_text:
+            logger.warning("Le message est vide.")
+            return False
             
         pattern = re.compile(r'^\s*(buy|sell)\s+(btc|btcusd|bitcoin|gold|xau|xauusd)\s*(now)?\s*$', re.IGNORECASE)
         if pattern.match(message_text):
             return await signal_kasper(message_text, message_id)
         else:
-            try:  # modified
+            try:
                 with open("pendingKasper.json", "r", encoding="utf-8") as f:
                     is_pending = json.load(f)
-            except FileNotFoundError:  # modified
-                logger.warning("Fichier pendingKasper.json non trouvé, création d'un état par défaut")  # modified
-                is_pending = {"pending_order": False}  # modified
-            except json.JSONDecodeError as e:  # modified
-                logger.error(f"Erreur de décodage JSON dans pendingKasper.json: {e}")  # modified
-                is_pending = {"pending_order": False}  # modified
-            except Exception as e:  # modified
-                logger.error(f"Erreur lors de la lecture de pendingKasper.json: {e}")  # modified
-                return False  # modified
+            except FileNotFoundError:
+                logger.warning("Fichier pendingKasper.json non trouvé, création d'un état par défaut")
+                is_pending = {"pending_order": False}
+            except json.JSONDecodeError as e:
+                logger.error(f"Erreur de décodage JSON dans pendingKasper.json: {e}")
+                is_pending = {"pending_order": False}
+            except Exception as e:
+                logger.error(f"Erreur lors de la lecture de pendingKasper.json: {e}")
+                return False
                 
-            if is_pending.get("pending_order", False):  # modified
-                logger.info(f"Ordre en attente détecté, récupération de l'ID du message: {message_id}")  # modified
-                logger.info("Attente de 20 secondes avant de récupérer le contenu du message...")  # modified
-                await asyncio.sleep(20)  # Attendre 20 secondes
-                logger.info("Fin de l'attente, récupération du contenu du message...")  # modified
+            if is_pending.get("pending_order", False):
+                logger.info(f"Ordre en attente détecté, récupération de l'ID du message: {message_id}")
+                logger.info("Attente de 20 secondes avant de récupérer le contenu du message...")
+                await asyncio.sleep(20)
+                logger.info("Fin de l'attente, récupération du contenu du message...")
                 
-                # Récupérer le contenu du message spécifique après l'attente
                 try:
                     kasper_entity = await client.get_entity(kasper_id)
-                    # Récupérer le message spécifique par son ID
                     updated_message = await client.get_messages(kasper_entity, ids=message_id)
                     if updated_message and updated_message.text:
                         updated_message_text = updated_message.text
@@ -109,40 +107,58 @@ async def signal_or_modify(message):
                         await modify_order(message_text, message_id, is_pending)
                 except Exception as e:
                     logger.error(f"Erreur lors de la récupération du message ID {message_id}: {e}")
-                    # Fallback sur le message original
                     await modify_order(message_text, message_id, is_pending)
                 
-                try:  # modified
+                try:
                     with open("pendingKasper.json", "w", encoding="utf-8") as f:
                         json.dump({"pending_order": False}, f)
-                except Exception as e:  # modified
-                    logger.error(f"Erreur lors de l'écriture dans pendingKasper.json: {e}")  # modified
+                except Exception as e:
+                    logger.error(f"Erreur lors de l'écriture dans pendingKasper.json: {e}")
                 return
             else:
-                logger.info("Aucun ordre en cours et le message n'est pas un signal de première instance.")  # modified
+                logger.info("Aucun ordre en cours et le message n'est pas un signal de première instance.")
                 return
                 
-    except Exception as e:  # modified
-        logger.error(f"Erreur dans signal_or_modify: {e}")  # modified
-        return False  # modified
+    except Exception as e:
+        logger.error(f"Erreur dans signal_or_modify: {e}")
+        return False
+
+
+def safe_float_conversion(value, field_name="valeur"):
+    """
+    Convertit une valeur en float de manière sécurisée
+    """
+    try:
+        if isinstance(value, str):
+            # Nettoyer la chaîne (supprimer espaces, virgules, etc.)
+            cleaned_value = value.replace(" ", "").replace(",", "")
+            return float(cleaned_value)
+        elif isinstance(value, (int, float)):
+            return float(value)
+        else:
+            logger.error(f"Type de données non supporté pour {field_name}: {type(value)}")
+            return None
+    except (ValueError, TypeError) as e:
+        logger.error(f"Erreur de conversion en float pour {field_name} '{value}': {e}")
+        return None
 
 
 async def modify_order(message, message_id, is_pending):
-    try:  # modified
-        # Validation des données pending  # modified
-        required_keys = ["symbol", "message_id", "order_ids", "sens"]  # modified
-        missing_keys = [key for key in required_keys if key not in is_pending]  # modified
-        if missing_keys:  # modified
-            logger.error(f"Clés manquantes dans is_pending: {missing_keys}")  # modified
-            return  # modified
+    try:
+        # Validation des données pending
+        required_keys = ["symbol", "message_id", "order_ids", "sens"]
+        missing_keys = [key for key in required_keys if key not in is_pending]
+        if missing_keys:
+            logger.error(f"Clés manquantes dans is_pending: {missing_keys}")
+            return
             
         symbol = is_pending["symbol"]
         message_id_signal = is_pending["message_id"]
         order_ids = is_pending["order_ids"]
         
-        if not isinstance(order_ids, list) or not order_ids:  # modified
-            logger.error("order_ids invalide ou vide")  # modified
-            return  # modified
+        if not isinstance(order_ids, list) or not order_ids:
+            logger.error("order_ids invalide ou vide")
+            return
             
         # Vérification que le message est bien le message +1
         if message_id != message_id_signal + 1:
@@ -193,119 +209,127 @@ async def modify_order(message, message_id, is_pending):
                 Pas de commentaires, pas de texte additionnel. Seulement le dictionnaire ou false.
                 """
                 
-            logger.info("Envoi du prompt à GPT-4...")  # modified
+            logger.info("Envoi du prompt à GPT-4...")
             
-            try:  # modified
+            try:
                 response = await client_gpt.chat.completions.create(
                     model="gpt-4-turbo",
                     messages=[{"role": "user", "content": prompt}],
-                    timeout=30  # modified
+                    timeout=30
                 )
-            except Exception as e:  # modified
-                logger.error(f"Erreur lors de l'appel à GPT-4: {e}")  # modified
-                return  # modified
+            except Exception as e:
+                logger.error(f"Erreur lors de l'appel à GPT-4: {e}")
+                return
                 
-            try:  # modified
+            try:
                 match = re.search(r'\{.*?\}', response.choices[0].message.content, re.DOTALL)
                 response_text = ast.literal_eval(match.group(0)) if match else None
-            except (ValueError, SyntaxError, AttributeError) as e:  # modified
-                logger.error(f"Erreur lors du parsing de la réponse GPT-4: {e}")  # modified
-                return  # modified
-            except Exception as e:  # modified
-                logger.error(f"Erreur inattendue lors du traitement de la réponse GPT-4: {e}")  # modified
-                return  # modified
+            except (ValueError, SyntaxError, AttributeError) as e:
+                logger.error(f"Erreur lors du parsing de la réponse GPT-4: {e}")
+                return
+            except Exception as e:
+                logger.error(f"Erreur inattendue lors du traitement de la réponse GPT-4: {e}")
+                return
                 
-            logger.info(f"Réponse de GPT-4: {response_text}")  # modified
+            logger.info(f"Réponse de GPT-4: {response_text}")
             
-            try:  # modified
+            try:
                 actual_positions = mt5.positions_get() 
-                if actual_positions is None:  # modified
-                    logger.error("Impossible de récupérer les positions actuelles")  # modified
-                    return  # modified
+                if actual_positions is None:
+                    logger.error("Impossible de récupérer les positions actuelles")
+                    return
                 actual_positions_tickets = [position.ticket for position in actual_positions]
-            except Exception as e:  # modified
-                logger.error(f"Erreur lors de la récupération des positions: {e}")  # modified
-                return  # modified
+            except Exception as e:
+                logger.error(f"Erreur lors de la récupération des positions: {e}")
+                return
                 
-            logger.info(f"Positions actuelles: {actual_positions_tickets}")  # modified
+            logger.info(f"Positions actuelles: {actual_positions_tickets}")
             
-            if not response_text or not isinstance(response_text, dict):  # modified
-                logger.error("Réponse GPT-4 invalide")  # modified
-                return  # modified
+            if not response_text or not isinstance(response_text, dict):
+                logger.error("Réponse GPT-4 invalide")
+                return
                 
-            # Validation des données de réponse  # modified
-            required_response_keys = ["TP", "sens", "actif", "SL"]  # modified
-            missing_response_keys = [key for key in required_response_keys if key not in response_text]  # modified
-            if missing_response_keys:  # modified
-                logger.error(f"Clés manquantes dans la réponse GPT-4: {missing_response_keys}")  # modified
-                return  # modified
+            # Validation des données de réponse
+            required_response_keys = ["TP", "sens", "actif", "SL", "Entry"]
+            missing_response_keys = [key for key in required_response_keys if key not in response_text]
+            if missing_response_keys:
+                logger.error(f"Clés manquantes dans la réponse GPT-4: {missing_response_keys}")
+                return
             
-            logger.info(f"{len(order_ids)} ordres vs {len(response_text['TP'])} TP")  # modified
-            logger.info(f"Sens: {is_pending['sens']} vs {response_text['sens']}")  # modified
-            logger.info(f"Symbole: {is_pending['symbol']} vs {response_text['actif']}")  # modified
+            logger.info(f"{len(order_ids)} ordres vs {len(response_text['TP'])} TP")
+            logger.info(f"Sens: {is_pending['sens']} vs {response_text['sens']}")
+            logger.info(f"Symbole: {is_pending['symbol']} vs {response_text['actif']}")
 
             if (len(response_text["TP"]) == len(order_ids) and 
                 response_text["sens"] == is_pending["sens"] and 
-                response_text["actif"] == is_pending["symbol"]):                   
+                response_text["actif"] == is_pending["symbol"]):
+                
+                # Conversion sécurisée des prix
+                entry_price = safe_float_conversion(response_text["Entry"], "Entry")
+                sl_price = safe_float_conversion(response_text["SL"], "SL")
+                
+                if entry_price is None or sl_price is None:
+                    logger.error("Erreur de conversion des prix Entry ou SL")
+                    return
+                
                 for i, tp in enumerate(response_text["TP"]): 
-                    if i >= len(order_ids):  # modified
-                        logger.warning(f"Index {i} dépasse le nombre d'ordres disponibles")  # modified
-                        break  # modified
+                    if i >= len(order_ids):
+                        logger.warning(f"Index {i} dépasse le nombre d'ordres disponibles")
+                        break
                         
                     if order_ids[i] in actual_positions_tickets:
-                        logger.info(f"Modification de l'ordre {i} en cours...")  # modified
+                        logger.info(f"Modification de l'ordre {i} en cours...")
                         
-                        try:  # modified
+                        # Conversion sécurisée du TP
+                        tp_price = safe_float_conversion(tp, f"TP{i+1}")
+                        if tp_price is None:
+                            logger.error(f"Erreur de conversion du TP{i+1}: {tp}")
+                            continue
+                        
+                        try:
                             request = {
                                 "action": mt5.TRADE_ACTION_SLTP,
                                 "position": order_ids[i],
-                                "sl": float(response_text["SL"].replace(" ", "")),
-                                "tp": float(tp.replace(" ", ""))
+                                "sl": sl_price,
+                                "tp": tp_price
                             }
                             
                             order_modified = mt5.order_send(request)
-                            if order_modified is None:  # modified
-                                logger.error(f"Échec de la modification de l'ordre {order_ids[i]}: {mt5.last_error()}")  # modified
-                                continue  # modified
+                            if order_modified is None:
+                                logger.error(f"Échec de la modification de l'ordre {order_ids[i]}: {mt5.last_error()}")
+                                continue
                                 
                             if order_modified.retcode != mt5.TRADE_RETCODE_DONE:
-                                logger.error(f"Erreur lors de la modification de l'ordre {order_ids[i]}: {order_modified.retcode}")  # modified
-                                continue  # modified
+                                logger.error(f"Erreur lors de la modification de l'ordre {order_ids[i]}: {order_modified.retcode}")
+                                continue
                                 
-                            logger.info(f"Ordre modifié avec succès, ID: {order_ids[i]}, SL: {response_text['SL']}, TP: {tp}")  # modified
+                            logger.info(f"Ordre modifié avec succès, ID: {order_ids[i]}, SL: {sl_price}, TP: {tp_price}")
                             
-                            # Démarrer le monitoring du break even pour cet ordre
-                            if i == 0:  # Seulement pour le premier ordre (TP1)
-                                entry_price = float(response_text["Entry"].replace(" ", ""))
-                                tp1_price = float(tp.replace(" ", ""))
-                                sl_price = float(response_text["SL"].replace(" ", ""))
-                                
+                            # Démarrer le monitoring du break even pour le premier ordre (TP1)
+                            if i == 0:
                                 await start_break_even_monitoring(
                                     order_ids[i], 
                                     entry_price, 
-                                    tp1_price, 
+                                    tp_price, 
                                     sl_price, 
                                     response_text["sens"], 
                                     symbol
                                 )
                             
-                        except (ValueError, TypeError) as e:  # modified
-                            logger.error(f"Erreur de conversion des prix pour l'ordre {order_ids[i]}: {e}")  # modified
-                            continue  # modified
-                        except Exception as e:  # modified
-                            logger.error(f"Erreur lors de la modification de l'ordre {order_ids[i]}: {e}")  # modified
-                            continue  # modified
+                        except Exception as e:
+                            logger.error(f"Erreur lors de la modification de l'ordre {order_ids[i]}: {e}")
+                            continue
                     else:
-                        logger.warning(f"Ordre non trouvé dans les positions actuelles, ID: {order_ids[i]}")  # modified
+                        logger.warning(f"Ordre non trouvé dans les positions actuelles, ID: {order_ids[i]}")
             else:
-                logger.error("Les paramètres de modification ne correspondent pas aux ordres en cours")  # modified
+                logger.error("Les paramètres de modification ne correspondent pas aux ordres en cours")
                 return
         else:
-            logger.info("Le message n'est pas un signal de modification d'ordre.")  # modified
+            logger.info("Le message n'est pas un signal de modification d'ordre.")
             return
             
-    except Exception as e:  # modified
-        logger.error(f"Erreur dans modify_order: {e}")  # modified
+    except Exception as e:
+        logger.error(f"Erreur dans modify_order: {e}")
 
 
 async def start_break_even_monitoring(position_id, entry_price, tp1_price, sl_price, sens, symbol):
@@ -314,6 +338,15 @@ async def start_break_even_monitoring(position_id, entry_price, tp1_price, sl_pr
     Quand le cours atteint 3/4 du TP1, le SL est déplacé au break even (entry price)
     """
     try:
+        # Validation des types et conversion si nécessaire
+        entry_price = safe_float_conversion(entry_price, "entry_price")
+        tp1_price = safe_float_conversion(tp1_price, "tp1_price")
+        sl_price = safe_float_conversion(sl_price, "sl_price")
+        
+        if None in [entry_price, tp1_price, sl_price]:
+            logger.error("Erreur de conversion des prix pour le break even monitoring")
+            return
+        
         # Calculer le prix de déclenchement du break even (3/4 du chemin vers TP1)
         if sens == 0:  # BUY
             distance_to_tp1 = tp1_price - entry_price
@@ -347,70 +380,84 @@ async def monitor_break_even(position_id):
     Surveille en continu le prix pour appliquer le break even
     """
     try:
+        logger.info(f"Démarrage du monitoring break even pour la position {position_id}")
+        
         while position_id in break_even_monitoring:
-            if break_even_monitoring[position_id]["break_even_applied"]:
-                break
+            try:
+                if break_even_monitoring[position_id]["break_even_applied"]:
+                    logger.info(f"Break even déjà appliqué pour la position {position_id}")
+                    break
+                    
+                # Vérifier si la position existe encore
+                positions = mt5.positions_get()
+                if positions is None:
+                    logger.error("Impossible de récupérer les positions pour le monitoring break even")
+                    break
+                    
+                position_exists = any(pos.ticket == position_id for pos in positions)
+                if not position_exists:
+                    logger.info(f"Position {position_id} fermée, arrêt du monitoring break even")
+                    break
                 
-            # Vérifier si la position existe encore
-            positions = mt5.positions_get()
-            if positions is None:
-                logger.error("Impossible de récupérer les positions pour le monitoring break even")
-                break
+                # Récupérer le prix actuel
+                symbol = break_even_monitoring[position_id]["symbol"]
+                tick_info = mt5.symbol_info_tick(symbol)
+                if tick_info is None:
+                    logger.error(f"Impossible de récupérer le prix pour {symbol}")
+                    await asyncio.sleep(5)
+                    continue
                 
-            position_exists = any(pos.ticket == position_id for pos in positions)
-            if not position_exists:
-                logger.info(f"Position {position_id} fermée, arrêt du monitoring break even")
-                del break_even_monitoring[position_id]
-                break
-            
-            # Récupérer le prix actuel
-            symbol = break_even_monitoring[position_id]["symbol"]
-            tick_info = mt5.symbol_info_tick(symbol)
-            if tick_info is None:
-                logger.error(f"Impossible de récupérer le prix pour {symbol}")
+                current_price = tick_info.bid if break_even_monitoring[position_id]["sens"] == 0 else tick_info.ask
+                trigger_price = break_even_monitoring[position_id]["trigger_price"]
+                entry_price = break_even_monitoring[position_id]["entry_price"]
+                sens = break_even_monitoring[position_id]["sens"]
+                
+                # Vérifier si le prix a atteint le trigger
+                trigger_reached = False
+                if sens == 0:  # BUY
+                    trigger_reached = current_price >= trigger_price
+                else:  # SELL
+                    trigger_reached = current_price <= trigger_price
+                
+                if trigger_reached:
+                    logger.info(f"Break even déclenché pour la position {position_id} - Prix actuel: {current_price}, Trigger: {trigger_price}")
+                    
+                    # Récupérer le TP actuel de la position
+                    current_tp = None
+                    for pos in positions:
+                        if pos.ticket == position_id:
+                            current_tp = pos.tp
+                            break
+                    
+                    if current_tp is None:
+                        logger.error(f"Impossible de récupérer le TP actuel pour la position {position_id}")
+                        break
+                    
+                    # Modifier le SL au break even
+                    request = {
+                        "action": mt5.TRADE_ACTION_SLTP,
+                        "position": position_id,
+                        "sl": entry_price,
+                        "tp": current_tp
+                    }
+                    
+                    order_result = mt5.order_send(request)
+                    if order_result and order_result.retcode == mt5.TRADE_RETCODE_DONE:
+                        logger.info(f"✅ Break even appliqué avec succès pour la position {position_id} - SL déplacé à {entry_price}")
+                        break_even_monitoring[position_id]["break_even_applied"] = True
+                    else:
+                        error_info = mt5.last_error() if mt5.last_error() else "Erreur inconnue"
+                        logger.error(f"❌ Échec de l'application du break even pour la position {position_id}: {error_info}")
+                    
+                    break
+                
+                # Attendre 5 secondes avant la prochaine vérification
+                await asyncio.sleep(5)
+                
+            except Exception as e:
+                logger.error(f"Erreur dans la boucle de monitoring break even pour la position {position_id}: {e}")
                 await asyncio.sleep(5)
                 continue
-            
-            current_price = tick_info.bid if break_even_monitoring[position_id]["sens"] == 0 else tick_info.ask
-            trigger_price = break_even_monitoring[position_id]["trigger_price"]
-            entry_price = break_even_monitoring[position_id]["entry_price"]
-            sens = break_even_monitoring[position_id]["sens"]
-            
-            # Vérifier si le prix a atteint le trigger
-            trigger_reached = False
-            if sens == 0:  # BUY
-                trigger_reached = current_price >= trigger_price
-            else:  # SELL
-                trigger_reached = current_price <= trigger_price
-            
-            if trigger_reached:
-                logger.info(f"Break even déclenché pour la position {position_id} - Prix actuel: {current_price}, Trigger: {trigger_price}")
-                
-                # Modifier le SL au break even
-                request = {
-                    "action": mt5.TRADE_ACTION_SLTP,
-                    "position": position_id,
-                    "sl": entry_price,
-                    # Garder le TP existant
-                }
-                
-                # Récupérer le TP actuel
-                for pos in positions:
-                    if pos.ticket == position_id:
-                        request["tp"] = pos.tp
-                        break
-                
-                order_result = mt5.order_send(request)
-                if order_result and order_result.retcode == mt5.TRADE_RETCODE_DONE:
-                    logger.info(f"✅ Break even appliqué avec succès pour la position {position_id} - SL déplacé à {entry_price}")
-                    break_even_monitoring[position_id]["break_even_applied"] = True
-                else:
-                    logger.error(f"❌ Échec de l'application du break even pour la position {position_id}: {mt5.last_error()}")
-                
-                break
-            
-            # Attendre 5 secondes avant la prochaine vérification
-            await asyncio.sleep(5)
             
     except Exception as e:
         logger.error(f"Erreur dans le monitoring break even pour la position {position_id}: {e}")
@@ -418,139 +465,140 @@ async def monitor_break_even(position_id):
         # Nettoyer le monitoring
         if position_id in break_even_monitoring:
             del break_even_monitoring[position_id]
+            logger.info(f"Monitoring break even terminé pour la position {position_id}")
 
 
 async def signal_kasper(message, message_id):
-    try:  # modified
+    try:
         pattern = re.compile(r'^\s*(buy|sell)\s+(btc|btcusd|bitcoin|gold|xau|xauusd)\s*(now)?\s*$', re.IGNORECASE)
         if not pattern.match(message):
-            logger.error("Le message ne correspond pas au pattern de signal")  # modified
+            logger.error("Le message ne correspond pas au pattern de signal")
             return False
             
         if "buy" in message.lower():
-            logger.info("Signal d'achat détecté.")  # modified
+            logger.info("Signal d'achat détecté.")
             if "xau" in message.lower() or "gold" in message.lower():
                 symbol = "XAUUSD"
-                try:  # modified
+                try:
                     tick_info = mt5.symbol_info_tick(symbol)
-                    if tick_info is None:  # modified
-                        logger.error("Impossible de récupérer les informations de tick pour XAUUSD")  # modified
-                        return False  # modified
+                    if tick_info is None:
+                        logger.error("Impossible de récupérer les informations de tick pour XAUUSD")
+                        return False
                     price = tick_info.ask
-                    if price is None or price <= 0:  # modified
-                        logger.error(f"Prix invalide pour XAUUSD: {price}")  # modified
-                        return False  # modified
-                except Exception as e:  # modified
-                    logger.error(f"Erreur lors de la récupération du prix de l'or: {e}")  # modified
+                    if price is None or price <= 0:
+                        logger.error(f"Prix invalide pour XAUUSD: {price}")
+                        return False
+                except Exception as e:
+                    logger.error(f"Erreur lors de la récupération du prix de l'or: {e}")
                     return False
                     
                 sens = mt5.ORDER_TYPE_BUY
                 tps = [price + 4, price + 8, price + 12]
                 sl = price - 4
-                logger.info(f"Ordre XAUUSD BUY - Prix: {price}, TP: {tps}, SL: {sl}")  # modified
+                logger.info(f"Ordre XAUUSD BUY - Prix: {price}, TP: {tps}, SL: {sl}")
                 return await send_order_kasper(symbol, price, sl, tps, sens, message_id)
                 
             elif "btc" in message.lower() or "bitcoin" in message.lower():
                 symbol = "BTCUSD"
-                try:  # modified
+                try:
                     tick_info = mt5.symbol_info_tick(symbol)
-                    if tick_info is None:  # modified
-                        logger.error("Impossible de récupérer les informations de tick pour BTCUSD")  # modified
-                        return False  # modified
+                    if tick_info is None:
+                        logger.error("Impossible de récupérer les informations de tick pour BTCUSD")
+                        return False
                     price = tick_info.ask
-                    if price is None or price <= 0:  # modified
-                        logger.error(f"Prix invalide pour BTCUSD: {price}")  # modified
-                        return False  # modified
-                except Exception as e:  # modified
-                    logger.error(f"Erreur lors de la récupération du prix de Bitcoin: {e}")  # modified
+                    if price is None or price <= 0:
+                        logger.error(f"Prix invalide pour BTCUSD: {price}")
+                        return False
+                except Exception as e:
+                    logger.error(f"Erreur lors de la récupération du prix de Bitcoin: {e}")
                     return False
                     
                 sens = mt5.ORDER_TYPE_BUY
                 tps = [price + 400, price + 800, price + 1200]
                 sl = price - 400
-                logger.info(f"Ordre BTCUSD BUY - Prix: {price}, TP: {tps}, SL: {sl}")  # modified
+                logger.info(f"Ordre BTCUSD BUY - Prix: {price}, TP: {tps}, SL: {sl}")
                 return await send_order_kasper(symbol, price, sl, tps, sens, message_id)
             else:
-                logger.error("Symbole d'achat non reconnu")  # modified
+                logger.error("Symbole d'achat non reconnu")
                 return False
                 
         elif "sell" in message.lower():
-            logger.info("Signal de vente détecté.")  # modified
+            logger.info("Signal de vente détecté.")
             if "xau" in message.lower() or "gold" in message.lower():
                 symbol = "XAUUSD"
-                try:  # modified
+                try:
                     tick_info = mt5.symbol_info_tick(symbol)
-                    if tick_info is None:  # modified
-                        logger.error("Impossible de récupérer les informations de tick pour XAUUSD")  # modified
-                        return False  # modified
+                    if tick_info is None:
+                        logger.error("Impossible de récupérer les informations de tick pour XAUUSD")
+                        return False
                     price = tick_info.bid
-                    if price is None or price <= 0:  # modified
-                        logger.error(f"Prix invalide pour XAUUSD: {price}")  # modified
-                        return False  # modified
-                except Exception as e:  # modified
-                    logger.error(f"Erreur lors de la récupération du prix de l'or: {e}")  # modified
+                    if price is None or price <= 0:
+                        logger.error(f"Prix invalide pour XAUUSD: {price}")
+                        return False
+                except Exception as e:
+                    logger.error(f"Erreur lors de la récupération du prix de l'or: {e}")
                     return False
                     
                 sens = mt5.ORDER_TYPE_SELL
                 tps = [price - 4, price - 8, price - 12]
                 sl = price + 4
-                logger.info(f"Ordre XAUUSD SELL - Prix: {price}, TP: {tps}, SL: {sl}")  # modified
+                logger.info(f"Ordre XAUUSD SELL - Prix: {price}, TP: {tps}, SL: {sl}")
                 return await send_order_kasper(symbol, price, sl, tps, sens, message_id)
                 
             elif "btc" in message.lower() or "bitcoin" in message.lower():
                 symbol = "BTCUSD"
-                try:  # modified
+                try:
                     tick_info = mt5.symbol_info_tick(symbol)
-                    if tick_info is None:  # modified
-                        logger.error("Impossible de récupérer les informations de tick pour BTCUSD")  # modified
-                        return False  # modified
+                    if tick_info is None:
+                        logger.error("Impossible de récupérer les informations de tick pour BTCUSD")
+                        return False
                     price = tick_info.bid
-                    if price is None or price <= 0:  # modified
-                        logger.error(f"Prix invalide pour BTCUSD: {price}")  # modified
-                        return False  # modified
-                except Exception as e:  # modified
-                    logger.error(f"Erreur lors de la récupération du prix de Bitcoin: {e}")  # modified
+                    if price is None or price <= 0:
+                        logger.error(f"Prix invalide pour BTCUSD: {price}")
+                        return False
+                except Exception as e:
+                    logger.error(f"Erreur lors de la récupération du prix de Bitcoin: {e}")
                     return False
                     
                 sens = mt5.ORDER_TYPE_SELL
                 tps = [price - 400, price - 800, price - 1200]
                 sl = price + 400
-                logger.info(f"Ordre BTCUSD SELL - Prix: {price}, TP: {tps}, SL: {sl}")  # modified
+                logger.info(f"Ordre BTCUSD SELL - Prix: {price}, TP: {tps}, SL: {sl}")
                 return await send_order_kasper(symbol, price, sl, tps, sens, message_id)
             else:
-                logger.error("Symbole de vente non reconnu")  # modified
+                logger.error("Symbole de vente non reconnu")
                 return False
         else:
-            logger.error("Aucun signal d'achat ou de vente détecté")  # modified
+            logger.error("Aucun signal d'achat ou de vente détecté")
             return False
             
-    except Exception as e:  # modified
-        logger.error(f"Erreur dans signal_kasper: {e}")  # modified
-        return False  # modified
+    except Exception as e:
+        logger.error(f"Erreur dans signal_kasper: {e}")
+        return False
 
 async def send_order_kasper(symbol, price, sl, tps, sens, message_id):
-    try:  # modified
+    try:
         order_ids = []
         lot_size = 0.01 
         
-        # Validation des paramètres  # modified
-        if not symbol or not isinstance(symbol, str):  # modified
-            logger.error(f"Symbole invalide: {symbol}")  # modified
-            return False  # modified
+        # Validation des paramètres
+        if not symbol or not isinstance(symbol, str):
+            logger.error(f"Symbole invalide: {symbol}")
+            return False
             
-        if not isinstance(tps, list) or not tps:  # modified
-            logger.error(f"Liste TP invalide: {tps}")  # modified
-            return False  # modified
+        if not isinstance(tps, list) or not tps:
+            logger.error(f"Liste TP invalide: {tps}")
+            return False
             
-        if price <= 0 or sl <= 0:  # modified
-            logger.error(f"Prix ou SL invalide: price={price}, sl={sl}")  # modified
-            return False  # modified
+        if price <= 0 or sl <= 0:
+            logger.error(f"Prix ou SL invalide: price={price}, sl={sl}")
+            return False
             
         for i, tp in enumerate(tps): 
-            try:  # modified
-                if tp <= 0:  # modified
-                    logger.error(f"TP invalide à l'index {i}: {tp}")  # modified
-                    continue  # modified
+            try:
+                if tp <= 0:
+                    logger.error(f"TP invalide à l'index {i}: {tp}")
+                    continue
                     
                 request = {
                     "action": mt5.TRADE_ACTION_DEAL,
@@ -569,27 +617,27 @@ async def send_order_kasper(symbol, price, sl, tps, sens, message_id):
                 order = mt5.order_send(request)
                 print("response", order)
                 print(request)
-                if order is None:  # modified
-                    logger.error(f"Échec de l'envoi de l'ordre {i+1}: {mt5.last_error()}")  # modified
-                    continue  # modified
+                if order is None:
+                    logger.error(f"Échec de l'envoi de l'ordre {i+1}: {mt5.last_error()}")
+                    continue
                     
                 if order.retcode != mt5.TRADE_RETCODE_DONE:
-                    logger.error(f"Erreur lors de l'envoi de l'ordre {i+1}: {order.retcode} - {mt5.last_error()}")  # modified
-                    continue  # modified
+                    logger.error(f"Erreur lors de l'envoi de l'ordre {i+1}: {order.retcode} - {mt5.last_error()}")
+                    continue
                     
                 order_ids.append(order.order)  
-                logger.info(f"Ordre {i+1} envoyé avec succès, ID: {order.order}")  # modified
+                logger.info(f"Ordre {i+1} envoyé avec succès, ID: {order.order}")
                 
-            except (ValueError, TypeError) as e:  # modified
-                logger.error(f"Erreur de conversion pour l'ordre {i+1}: {e}")  # modified
-                continue  # modified
-            except Exception as e:  # modified
-                logger.error(f"Erreur lors de l'envoi de l'ordre {i+1}: {e}")  # modified
-                continue  # modified
+            except (ValueError, TypeError) as e:
+                logger.error(f"Erreur de conversion pour l'ordre {i+1}: {e}")
+                continue
+            except Exception as e:
+                logger.error(f"Erreur lors de l'envoi de l'ordre {i+1}: {e}")
+                continue
                 
-        if not order_ids:  # modified
-            logger.error("Aucun ordre n'a pu être envoyé")  # modified
-            return False  # modified
+        if not order_ids:
+            logger.error("Aucun ordre n'a pu être envoyé")
+            return False
             
         pending_kasper = {
             "pending_order": True,
@@ -599,15 +647,15 @@ async def send_order_kasper(symbol, price, sl, tps, sens, message_id):
             "sens": 0 if sens == mt5.ORDER_TYPE_BUY else 1
         }
         
-        try:  # modified
+        try:
             with open("pendingKasper.json", "w", encoding="utf-8") as f:
                 json.dump(pending_kasper, f, indent=4)
-            logger.info(f"État pending sauvegardé: {len(order_ids)} ordres")  # modified
-        except Exception as e:  # modified
-            logger.error(f"Erreur lors de la sauvegarde de l'état pending: {e}")  # modified
+            logger.info(f"État pending sauvegardé: {len(order_ids)} ordres")
+        except Exception as e:
+            logger.error(f"Erreur lors de la sauvegarde de l'état pending: {e}")
             
-        return True  # modified
+        return True
         
-    except Exception as e:  # modified
-        logger.error(f"Erreur dans send_order_kasper: {e}")  # modified
-        return False  # modified
+    except Exception as e:
+        logger.error(f"Erreur dans send_order_kasper: {e}")
+        return False
